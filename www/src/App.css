@@ -1,0 +1,41 @@
+.App {
+  display: flex;
+  height: 100%;
+}
+
+.Sidebar {
+  flex-grow: 1;
+  background: greenyellow;
+}
+
+.Content {
+  display: flex;
+  flex-grow: 4;
+  height: 100%;
+  flex-direction: column;
+}
+
+.Table {
+  background: yellowgreen;
+  flex-grow: 3;
+  flex-basis: 80%;
+}
+
+.Terminal {
+  flex-grow: 1;
+  flex-basis: 20%;
+  overflow-y: auto;
+}
+
+.Log {
+  font-size: small;
+  margin: 0;
+}
+
+.Log.log {
+  color: black;
+}
+
+.Log.error {
+  color: red;
+}
