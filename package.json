@@ -8,7 +8,7 @@
     "start:www": "echo run in www",
     "test": "echo run in www",
     "_fmt": "prettier --config .prettierrc '{*,app,www/**/*}.{js,jsx,css,ts,tsx,json}'",
-    "_lint": "tslint -p ./tsconfig.json -c ./tslint.json 'src/**/*.{ts,tsx}'",
+    "_lint": "tslint -p ./tsconfig.json -c ./tslint.json 'www/src/**/*.{ts,tsx}'",
     "lint": "npm run _fmt && npm run _lint",
     "fmt": "npm run _fmt -- --write"
   },

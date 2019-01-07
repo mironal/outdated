@@ -14,7 +14,8 @@ export const parse = (str: string) => {
   const regexp = /^\s*([^\s\n]+)\s+([0-9\.]+)\s+(\S+)\s+(\S+).*$/gm
   let match
   const results = []
-  while ((match = regexp.exec(str))) {
+  // tslint:disable-next-line:no-conditional-assignment
+  while ((match = regexp.exec(str)) != null) {
     const dep = {
       name: match[1],
       current: match[2],

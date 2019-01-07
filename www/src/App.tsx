@@ -2,9 +2,9 @@ import React, { Component } from "react"
 import "./App.css"
 import Sidebar from "./containers/Sidebar"
 import Content from "./containers/Content"
-import { AppState, groupedManagedContents, ManagedContent } from "./types"
+import { AppState, groupedManagedContents } from "./types"
 import { runCommand } from "./exporsedFunc"
-import { homebrew, npm, runOutdated } from "./commands"
+import { runOutdated } from "./commands"
 import { fetchContent } from "./storage"
 
 const defaultAppStore = (): AppState => ({
@@ -26,7 +26,7 @@ class App extends Component<{}, AppState> {
       .catch(error => console.error(error))
   }
 
-  onClickContent = (uuid: string) => {
+  private onClickContent = (uuid: string) => {
     if (this.state.commandRunning) {
       return
     }
@@ -68,19 +68,21 @@ class App extends Component<{}, AppState> {
     }
   }
 
-  onClickAdd = async (directory: string) => {
+  private onClickAdd = async (directory: string) => {
     if (directory.length === 0) {
       return
     }
 
     runCommand(`test -d ${directory}`)
-      .then(() => {})
+      .then(() => {
+        console.log(directory, "exists")
+      })
       .catch(error => {
         console.error(error)
       })
   }
 
-  render() {
+  public render() {
     const { activeManagerUUID, logs } = this.state
     const results = this.state.fetchResult[activeManagerUUID] || {}
     const loading = !this.state.fetchResult[activeManagerUUID]

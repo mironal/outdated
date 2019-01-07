@@ -2,7 +2,7 @@ import React, { PureComponent } from "react"
 import { GroupedManagedContent } from "../types"
 import classNames from "classnames"
 
-export type SidebarItemProps = {
+export interface SidebarItemProps {
   current: string
   content: GroupedManagedContent
   onClickContent?: (uuid: string) => void
@@ -42,11 +42,11 @@ interface ContentInputProps {
 }
 
 class ContentInput extends PureComponent<ContentInputProps, ContentInputState> {
-  state = { directory: "" }
-  onChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+  public state = { directory: "" }
+  public onChange = (event: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ directory: event.target.value })
-  onClickAdd = () => this.props.onClickAdd(this.state.directory)
-  render() {
+  public onClickAdd = () => this.props.onClickAdd(this.state.directory)
+  public render() {
     const { directory } = this.state
     return (
       <div>

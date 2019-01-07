@@ -4,9 +4,9 @@ export const parse = (str: string) => {
   const regexp = /^([^ \n]+) \(([0-9\.]+)\) < ([0-9.]+)$/gm
   let match
 
-  /** @type {{name: string; current: string; latest: string}[]} */
   const results = []
-  while ((match = regexp.exec(str))) {
+  // tslint:disable-next-line:no-conditional-assignment
+  while ((match = regexp.exec(str)) !== null) {
     const dep = {
       name: match[1],
       current: match[2],

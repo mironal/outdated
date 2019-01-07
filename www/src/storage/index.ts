@@ -2,7 +2,7 @@ import { ManagedContent, createContent } from "../types"
 
 type StorageKey = "contents"
 
-const write = async (key: StorageKey, obj: unknown) => {
+export const write = async (key: StorageKey, obj: unknown) => {
   const str = JSON.stringify(obj)
   localStorage.setItem(key, str)
   return Promise.resolve()

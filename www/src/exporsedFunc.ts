@@ -1,4 +1,3 @@
-import { OutdatedResult } from "./types"
 import { ExecOptions } from "child_process"
 
 const win: any = window

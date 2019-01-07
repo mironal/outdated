@@ -34,7 +34,7 @@ export interface ContentFetchResult {
 
 export interface GroupedManagedContent {
   path: ManagedContent["path"]
-  contents: Pick<ManagedContent, "uuid" | "manager">[]
+  contents: Array<Pick<ManagedContent, "uuid" | "manager">>
 }
 
 export interface LogEntry {
@@ -59,7 +59,7 @@ export const groupedManagedContents = (
   return contents.reduce(
     (results, current) => {
       const c = results.find(
-        c => displayPath(c.path) === displayPath(current.path),
+        r => displayPath(r.path) === displayPath(current.path),
       )
       if (c) {
         c.contents.push({
