@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid"
+
 export type PackageManager = "npm" | "homebrew"
 
 export type Cwd = "Globals" | string
@@ -6,6 +8,17 @@ export interface ManagedContent {
   uuid: string // unique string id
   path: string | null
   manager: PackageManager
+}
+
+export const createContent = (
+  manager: PackageManager,
+  path: string | null,
+): ManagedContent => {
+  return {
+    uuid: uuid(),
+    path,
+    manager,
+  }
 }
 
 export interface OutdatedResult {
@@ -35,14 +48,19 @@ export interface AppState {
   contents: ManagedContent[]
   fetchResult: { [uuid: string]: ContentFetchResult }
   activeManagerUUID: string
+  commandRunning: boolean
 }
 
 export const groupedManagedContents = (
   contents: ManagedContent[],
 ): GroupedManagedContent[] => {
+  const displayPath = (path: string | null) => (path == null ? "Globals" : path)
+
   return contents.reduce(
     (results, current) => {
-      const c = results.find(c => c.path === current.path)
+      const c = results.find(
+        c => displayPath(c.path) === displayPath(current.path),
+      )
       if (c) {
         c.contents.push({
           uuid: current.uuid,
@@ -50,7 +68,7 @@ export const groupedManagedContents = (
         })
       } else {
         const content: GroupedManagedContent = {
-          path: current.path,
+          path: displayPath(current.path),
           contents: [
             {
               uuid: current.uuid,

@@ -1,11 +1,12 @@
 .App {
   display: flex;
   height: 100%;
+  background: #ecffe3;
 }
 
 .Sidebar {
   flex-grow: 1;
-  background: greenyellow;
+  background: #98e076;
 }
 
 .Content {
@@ -16,7 +17,6 @@
 }
 
 .Table {
-  background: yellowgreen;
   flex-grow: 3;
   flex-basis: 80%;
 }
@@ -25,6 +25,7 @@
   flex-grow: 1;
   flex-basis: 20%;
   overflow-y: auto;
+  background: #ffffff;
 }
 
 .Log {

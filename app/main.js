@@ -1,6 +1,8 @@
 const carlo = require("carlo")
 const { exec } = require("child_process")
 const { promisify } = require("util")
+const os = require("os")
+const path = require("path")
 
 const execp = promisify(exec)
 
@@ -15,7 +17,9 @@ const runCommand = async (command, opt) => {
 
 ;(async () => {
   // Launch the browser.
-  const app = await carlo.launch()
+  const app = await carlo.launch({
+    userDataDir: path.join(os.homedir(), "mironal.outdated")
+  })
 
   // Terminate Node.js process on app window closing.
   app.on("exit", () => process.exit())

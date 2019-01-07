@@ -1,11 +1,18 @@
-import React from "react"
-import { GroupedManagedContent, AppState } from "../types"
+import React, { PureComponent } from "react"
+import { GroupedManagedContent } from "../types"
+import classNames from "classnames"
 
-export type SidebarItemProps = GroupedManagedContent & {
+export type SidebarItemProps = {
+  current: string
+  content: GroupedManagedContent
   onClickContent?: (uuid: string) => void
 }
 
-const SidebarItem = ({ path, contents, onClickContent }: SidebarItemProps) => {
+const SidebarItem = ({
+  content: { path, contents },
+  onClickContent,
+  current,
+}: SidebarItemProps) => {
   return (
     <div className="SidebarItem">
       <h3>{path || "Globals"}</h3>
@@ -13,6 +20,7 @@ const SidebarItem = ({ path, contents, onClickContent }: SidebarItemProps) => {
         {contents.map(c => {
           return (
             <li
+              className={classNames({ active: current === c.uuid })}
               key={c.uuid}
               onClick={() => onClickContent && onClickContent(c.uuid)}
             >
@@ -25,17 +33,55 @@ const SidebarItem = ({ path, contents, onClickContent }: SidebarItemProps) => {
   )
 }
 
-export type SidebarProps = {
-  contents: SidebarItemProps[]
-  onClickContent?: (uuid: string) => void
+interface ContentInputState {
+  directory: string
 }
 
-const Sidebar = ({ contents, onClickContent }: SidebarProps) => {
+interface ContentInputProps {
+  onClickAdd: (directory: string) => void
+}
+
+class ContentInput extends PureComponent<ContentInputProps, ContentInputState> {
+  state = { directory: "" }
+  onChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+    this.setState({ directory: event.target.value })
+  onClickAdd = () => this.props.onClickAdd(this.state.directory)
+  render() {
+    const { directory } = this.state
+    return (
+      <div>
+        <input onChange={this.onChange} type="text" value={directory} />
+        <button onClick={this.onClickAdd} disabled={directory.length === 0}>
+          add
+        </button>
+      </div>
+    )
+  }
+}
+
+export type SidebarProps = {
+  current: string
+  contents: GroupedManagedContent[]
+  onClickContent?: (uuid: string) => void
+} & ContentInputProps
+
+const Sidebar = ({
+  contents,
+  onClickContent,
+  onClickAdd,
+  current,
+}: SidebarProps) => {
   return (
     <div className="Sidebar">
       {contents.map((c, i) => (
-        <SidebarItem key={i} {...c} onClickContent={onClickContent} />
+        <SidebarItem
+          key={i}
+          content={c}
+          onClickContent={onClickContent}
+          current={current}
+        />
       ))}
+      <ContentInput onClickAdd={onClickAdd} />
     </div>
   )
 }

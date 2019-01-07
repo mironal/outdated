@@ -1,6 +1,6 @@
 export const command = (global: boolean) => {
   const builder = ["npm"]
-  if (global) {
+  if (global === true) {
     builder.push("-g")
   }
 
@@ -11,7 +11,7 @@ export const command = (global: boolean) => {
 }
 
 export const parse = (str: string) => {
-  const regexp = /^\s*([^\s\n]+)\s+([0-9\.]+)\s+(\S+)\s+(\S+).+$/gm
+  const regexp = /^\s*([^\s\n]+)\s+([0-9\.]+)\s+(\S+)\s+(\S+).*$/gm
   let match
   const results = []
   while ((match = regexp.exec(str))) {
