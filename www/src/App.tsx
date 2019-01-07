@@ -2,15 +2,9 @@ import React, { Component } from "react"
 import "./App.css"
 import Sidebar from "./containers/Sidebar"
 import Content from "./containers/Content"
-import {
-  AppState,
-  groupedManagedContents,
-  ManagedContent,
-  PackageManager,
-  createContent,
-} from "./types"
+import { AppState, groupedManagedContents, ManagedContent } from "./types"
 import { runCommand } from "./exporsedFunc"
-import { homebrew, npm } from "./commands"
+import { homebrew, npm, runOutdated } from "./commands"
 import { fetchContent } from "./storage"
 
 const defaultAppStore = (): AppState => ({
@@ -20,33 +14,6 @@ const defaultAppStore = (): AppState => ({
   activeManagerUUID: "1",
   commandRunning: false,
 })
-
-const runOutdated = async (
-  content: ManagedContent,
-  willRunCommand: (command: string) => void,
-) => {
-  if (content.manager === "homebrew") {
-    const command = homebrew.command
-    willRunCommand(command)
-    return runCommand(command).then(out => {
-      if (out.stderr.length > 0) {
-        return Promise.reject(new Error(out.stderr))
-      }
-      return Promise.resolve(homebrew.parse(out.stdout))
-    })
-  } else if (content.manager === "npm") {
-    const command = npm.command(content.path === null)
-    willRunCommand(command)
-    return runCommand(command, { cwd: content.path || "." }).then(out => {
-      if (out.stderr.length > 0) {
-        return Promise.reject(new Error(out.stderr))
-      }
-      return Promise.resolve(npm.parse(out.stdout))
-    })
-  }
-
-  return Promise.reject(new Error(`${content.manager} is not supported yet`))
-}
 
 class App extends Component<{}, AppState> {
   public state = defaultAppStore()
