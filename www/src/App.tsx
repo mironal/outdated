@@ -30,7 +30,10 @@ class App extends Component<{}, AppState> {
   }
   private addLog = (msg: string, level: LogEntry["level"] = "log") =>
     this.setState({
-      logs: [...this.state.logs, { timestamp: new Date(), level, msg }],
+      logs: [
+        ...this.state.logs,
+        { timestamp: new Date().getTime(), level, msg },
+      ],
     })
 
   private fetch = (uuid: string) => {
@@ -89,6 +92,7 @@ class App extends Component<{}, AppState> {
     const { activeManagerUUID, logs } = this.state
     const results = this.state.fetchResult[activeManagerUUID] || {}
     const loading = !this.state.fetchResult[activeManagerUUID]
+    console.log(logs)
     return (
       <div className="App">
         <Sidebar

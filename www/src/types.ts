@@ -39,7 +39,7 @@ export interface GroupedManagedContent {
 }
 
 export interface LogEntry {
-  timestamp: Date
+  timestamp: number
   level: "error" | "log"
   msg: string
 }

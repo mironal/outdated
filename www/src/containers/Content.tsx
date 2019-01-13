@@ -1,22 +1,16 @@
 import React from "react"
 import ReactTable, { ComponentPropsGetterRC } from "react-table"
 import "react-table/react-table.css"
-import classnames from "classnames"
 
 import { OutdatedResult, LogEntry } from "../types"
+import Terminal from "../components/Terminal"
 
-const LogLine = (entry: LogEntry) => {
-  return (
-    <p className={classnames("Log", entry.level)}>
-      {entry.timestamp.toTimeString()}: {entry.msg}
-    </p>
-  )
-}
 export interface ContentProps {
   loading: boolean
   results?: OutdatedResult[]
   logs: LogEntry[]
 }
+
 const cellClass: ComponentPropsGetterRC = (state, rowInfo, column) => {
   if (!column || !rowInfo) {
     return {}
@@ -57,11 +51,7 @@ const Content = ({ loading, results, logs }: ContentProps) => {
           ]}
         />
       </div>
-      <div className="Terminal">
-        {logs.reverse().map((l, i) => (
-          <LogLine key={i} {...l} />
-        ))}
-      </div>
+      <Terminal logs={logs} />
     </div>
   )
 }
