@@ -6,6 +6,7 @@
 .Sidebar {
   flex-grow: 1;
   padding: 1em 0 0 1em;
+  border-right: 1px solid white;
 }
 
 .pkg-manager.active {
@@ -46,6 +47,12 @@
   color: red;
 }
 
+.Terminal::before {
+  display: block;
+  content: "";
+  border-top: 1px solid white;
+}
+
 .Terminal {
   background: rgb(19, 19, 19);
   flex-basis: 20%;
@@ -56,6 +63,10 @@
 .Log {
   font-size: small;
   margin: 0 0 0.1em 0;
+}
+
+.Log:first-child {
+  margin-top: 0.4em;
 }
 
 .Log.error {
