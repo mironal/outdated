@@ -1,40 +1,61 @@
 .App {
   display: flex;
   height: 100%;
-  background: #ecffe3;
 }
 
 .Sidebar {
   flex-grow: 1;
-  background: #98e076;
+  padding: 1em 0 0 1em;
+}
+
+.pkg-manager.active {
+  color: white;
+}
+
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover {
+  color: white;
 }
 
 .Content {
   display: flex;
   flex-grow: 4;
-  height: 100%;
   flex-direction: column;
+  height: 100%;
 }
 
 .Table {
-  flex-grow: 3;
-  flex-basis: 80%;
+  height: 80%;
+}
+
+.ReactTable {
+  height: 100%;
+}
+
+.ReactTable .rt-thead {
+  overflow-y: scroll;
+}
+
+.rt-td.wanted {
+  color: yellow;
+}
+
+.rt-td.latest {
+  color: red;
 }
 
 .Terminal {
-  flex-grow: 1;
+  background: rgb(19, 19, 19);
   flex-basis: 20%;
+  padding: 0.2em;
   overflow-y: auto;
-  background: #ffffff;
 }
 
 .Log {
   font-size: small;
-  margin: 0;
-}
-
-.Log.log {
-  color: black;
+  margin: 0 0 0.1em 0;
 }
 
 .Log.error {

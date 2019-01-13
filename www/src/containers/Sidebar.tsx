@@ -20,7 +20,11 @@ const SidebarItem = ({
         {contents.map(c => {
           return (
             <li
-              className={classNames({ active: current === c.uuid })}
+              className={classNames([
+                { active: current === c.uuid },
+                "clickable",
+                "pkg-manager",
+              ])}
               key={c.uuid}
               onClick={() => onClickContent && onClickContent(c.uuid)}
             >

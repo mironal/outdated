@@ -1,27 +1,58 @@
-export const command = (global: boolean) => {
+export const listCommand = (global: boolean) => {
+  const builder = ["npm"]
+  if (global === true) {
+    builder.push("-g")
+  }
+
+  builder.push("list")
+  builder.push("--json")
+  builder.push("|| true") // avoid exit code 1
+
+  return builder.join(" ")
+}
+
+export const outdatedCommand = (global: boolean) => {
   const builder = ["npm"]
   if (global === true) {
     builder.push("-g")
   }
 
   builder.push("outdated")
+  builder.push("--json")
   builder.push("|| true") // avoid exit code 1
 
   return builder.join(" ")
 }
 
-export const parse = (str: string) => {
-  const regexp = /^\s*([^\s\n]+)\s+([0-9\.]+)\s+(\S+)\s+(\S+).*$/gm
-  let match
-  const results = []
-  // tslint:disable-next-line:no-conditional-assignment
-  while ((match = regexp.exec(str)) != null) {
-    const dep = {
-      name: match[1],
-      current: match[2],
-      latest: match[4],
+export const parseList = (jsonString: string) => {
+  const json = JSON.parse(jsonString) as {
+    dependencies: {
+      [pkg: string]: {
+        version: string
+      }
     }
-    results.push(dep)
   }
-  return results
+
+  return Object.keys(json.dependencies).map(key => {
+    const o = json.dependencies[key]
+    return {
+      name: key,
+      current: o.version,
+    }
+  })
+}
+
+export const parseOutdated = (jsonString: string) => {
+  const json = JSON.parse(jsonString) as {
+    [pkg: string]: {
+      current: string
+      wanted: string
+      latest: string
+    }
+  }
+
+  return Object.keys(json).map(key => {
+    const o = json[key]
+    return { name: key, current: o.current, wanted: o.wanted, latest: o.latest }
+  })
 }

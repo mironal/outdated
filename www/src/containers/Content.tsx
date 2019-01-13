@@ -1,5 +1,5 @@
 import React from "react"
-import ReactTable from "react-table"
+import ReactTable, { ComponentPropsGetterRC } from "react-table"
 import "react-table/react-table.css"
 import classnames from "classnames"
 
@@ -17,17 +17,29 @@ export interface ContentProps {
   results?: OutdatedResult[]
   logs: LogEntry[]
 }
-
+const cellClass: ComponentPropsGetterRC = (state, rowInfo, column) => {
+  if (!column || !rowInfo) {
+    return {}
+  }
+  const { current, wanted, latest } = rowInfo.original as OutdatedResult
+  if (column.Header === "Wanted" && current !== wanted) {
+    return { className: "wanted" }
+  } else if (column.Header === "Latest" && current !== latest) {
+    return { className: "latest" }
+  }
+  return {}
+}
 const Content = ({ loading, results, logs }: ContentProps) => {
   return (
     <div className="Content">
       <div className="Table">
         <ReactTable
+          className="OutdatedTable"
           data={results}
           loading={loading}
           showPagination={false}
-          defaultPageSize={10}
-          minRows={3}
+          pageSize={Math.max((results || []).length, 20)}
+          getTdProps={cellClass}
           columns={[
             {
               Header: "Name",
@@ -37,6 +49,7 @@ const Content = ({ loading, results, logs }: ContentProps) => {
               Header: "Current",
               accessor: "current",
             },
+            { Header: "Wanted", accessor: "wanted" },
             {
               Header: "Latest",
               accessor: "latest",

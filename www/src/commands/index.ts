@@ -1,33 +1,69 @@
 import * as homebrew from "./homebrew"
 import * as npm from "./npm"
-import { ManagedContent } from "../types"
+import { ManagedContent, OutdatedResult } from "../types"
 import { runCommand } from "../exporsedFunc"
+import { ExecOptions } from "child_process"
 
 export { homebrew, npm }
 
-export const runOutdated = async (
+export interface Runner {
+  command: string
+  opt?: ExecOptions
+  parse(str: string): OutdatedResult[]
+}
+export const buildRunner = (
   content: ManagedContent,
-  willRunCommand: (command: string) => void,
-) => {
+  type: "outdated" | "list",
+): Runner => {
   if (content.manager === "homebrew") {
-    const command = homebrew.command
-    willRunCommand(command)
-    return runCommand(command).then(out => {
-      if (out.stderr.length > 0) {
-        return Promise.reject(new Error(out.stderr))
-      }
-      return Promise.resolve(homebrew.parse(out.stdout))
-    })
+    return {
+      command:
+        type === "list" ? homebrew.listCommand : homebrew.outdatedCommand,
+      parse: type === "list" ? homebrew.parseList : homebrew.parseOutdated,
+    }
   } else if (content.manager === "npm") {
-    const command = npm.command(content.path === null)
-    willRunCommand(command)
-    return runCommand(command, { cwd: content.path || "." }).then(out => {
-      if (out.stderr.length > 0) {
-        return Promise.reject(new Error(out.stderr))
-      }
-      return Promise.resolve(npm.parse(out.stdout))
-    })
+    const global = content.path === null
+    return {
+      command:
+        type === "list" ? npm.listCommand(global) : npm.outdatedCommand(global),
+      parse: type === "list" ? npm.parseList : npm.parseOutdated,
+      opt: { cwd: content.path || undefined, maxBuffer: 1024 * 1024 },
+    }
   }
 
-  return Promise.reject(new Error(`${content.manager} is not supported yet`))
+  throw new Error(`${type} ${content.manager} is not supported yet`)
+}
+
+export const run = (runner: Runner) => {
+  return runCommand(runner.command, runner.opt).then(out => {
+    if (out.stderr.length > 0) {
+      return Promise.reject(new Error(out.stderr))
+    }
+    return Promise.resolve(runner.parse(out.stdout))
+  })
+}
+
+export const merge = (list: OutdatedResult[], outdated: OutdatedResult[]) => {
+  return [...list, ...outdated]
+    .reduce(
+      (rs, r) => {
+        const index = rs.findIndex(elem => elem.name === r.name)
+        if (index > -1) {
+          rs[index] = r
+        } else {
+          rs.push(r)
+        }
+
+        return rs
+      },
+      [] as OutdatedResult[],
+    )
+    .map(r => {
+      return {
+        name: r.name,
+        current: r.current,
+        latest: r.latest || r.current,
+        wanted: r.wanted || r.current,
+      }
+    })
 }

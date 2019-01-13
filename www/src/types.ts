@@ -24,7 +24,8 @@ export const createContent = (
 export interface OutdatedResult {
   name: string
   current: string
-  latest: string
+  latest?: string
+  wanted?: string
 }
 
 export interface ContentFetchResult {

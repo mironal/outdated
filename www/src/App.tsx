@@ -2,9 +2,9 @@ import React, { Component } from "react"
 import "./App.css"
 import Sidebar from "./containers/Sidebar"
 import Content from "./containers/Content"
-import { AppState, groupedManagedContents } from "./types"
+import { AppState, groupedManagedContents, LogEntry } from "./types"
 import { runCommand } from "./exporsedFunc"
-import { runOutdated } from "./commands"
+import { buildRunner, run, merge } from "./commands"
 import { fetchContent } from "./storage"
 
 const defaultAppStore = (): AppState => ({
@@ -21,51 +21,54 @@ class App extends Component<{}, AppState> {
   public componentDidMount() {
     fetchContent()
       .then(contents => {
-        this.setState({ contents, activeManagerUUID: contents[0].uuid })
+        this.setState({ contents })
+        setImmediate(() => {
+          this.fetch(contents[0].uuid)
+        })
       })
       .catch(error => console.error(error))
   }
+  private addLog = (msg: string, level: LogEntry["level"] = "log") =>
+    this.setState({
+      logs: [...this.state.logs, { timestamp: new Date(), level, msg }],
+    })
 
-  private onClickContent = (uuid: string) => {
-    if (this.state.commandRunning) {
+  private fetch = (uuid: string) => {
+    this.setState({ activeManagerUUID: uuid })
+    const content = this.state.contents.find(c => c.uuid === uuid)
+    if (!content) {
       return
     }
-    this.setState({ activeManagerUUID: uuid, commandRunning: true })
-    const content = this.state.contents.find(c => c.uuid === uuid)
-    if (content) {
-      runOutdated(content, command => {
-        const logs = this.state.logs
+    const runner = buildRunner(content, "list")
+
+    this.addLog(`run > ${runner.command}`)
+    run(runner)
+      .then(results => {
+        const outdated = buildRunner(content, "outdated")
+
+        this.addLog(`run > ${outdated.command}`)
+        return Promise.all([results, run(outdated)])
+      })
+      .then(results => {
+        const list = results[0]
+        const outdated = results[1]
+        const merged = merge(list, outdated)
+        const current = this.state.fetchResult
+
         this.setState({
-          logs: [
-            ...logs,
-            { timestamp: new Date(), level: "log", msg: `run > ${command}` },
-          ],
+          fetchResult: {
+            ...current,
+            [uuid]: { results: merged },
+          },
         })
       })
-        .then(results => {
-          const current = this.state.fetchResult
-          this.setState({
-            commandRunning: false,
-            fetchResult: {
-              ...current,
-              [uuid]: { results },
-            },
-          })
-        })
-        .catch(error => {
-          console.error(error)
-          const logs = this.state.logs
-          this.setState({
-            commandRunning: false,
-            logs: [
-              ...logs,
-              { timestamp: new Date(), level: "error", msg: error.message },
-            ],
-          })
-        })
-    } else {
-      console.warn("not found", uuid, "in", this.state.contents)
-    }
+      .catch(error => {
+        console.error(error)
+      })
+  }
+
+  private onClickContent = (uuid: string) => {
+    this.fetch(uuid)
   }
 
   private onClickAdd = async (directory: string) => {
