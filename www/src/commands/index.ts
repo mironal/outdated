@@ -22,12 +22,13 @@ export const buildRunner = (
       parse: type === "list" ? homebrew.parseList : homebrew.parseOutdated,
     }
   } else if (content.manager === "npm") {
-    const global = content.path === null
+    const global = content.path === "Globals"
+    const cwd = content.path === "Globals" ? undefined : content.path
     return {
       command:
         type === "list" ? npm.listCommand(global) : npm.outdatedCommand(global),
       parse: type === "list" ? npm.parseList : npm.parseOutdated,
-      opt: { cwd: content.path || undefined, maxBuffer: 1024 * 1024 },
+      opt: { cwd, maxBuffer: 1024 * 1024 },
     }
   }
 

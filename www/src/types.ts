@@ -1,24 +1,29 @@
-import { v4 as uuid } from "uuid"
-
 export type PackageManager = "npm" | "homebrew"
 
 export type Cwd = "Globals" | string
 
 export interface ManagedContent {
-  uuid: string // unique string id
-  path: string | null
+  path: string // Globals is special string
   manager: PackageManager
 }
 
 export const createContent = (
   manager: PackageManager,
-  path: string | null,
+  path: string,
 ): ManagedContent => {
   return {
-    uuid: uuid(),
     path,
     manager,
   }
+}
+
+export const managerKey = (mc: ManagedContent) => `${mc.path}-${mc.manager}`
+
+export const resolveGlobals = () => {
+  return Promise.resolve([
+    createContent("homebrew", "Globals"),
+    createContent("npm", "Globals"),
+  ])
 }
 
 export interface OutdatedResult {
@@ -35,7 +40,7 @@ export interface ContentFetchResult {
 
 export interface GroupedManagedContent {
   path: ManagedContent["path"]
-  contents: Array<Pick<ManagedContent, "uuid" | "manager">>
+  pkgManagers: PackageManager[]
 }
 
 export interface LogEntry {
@@ -48,34 +53,22 @@ export interface AppState {
   logs: LogEntry[]
   contents: ManagedContent[]
   fetchResult: { [uuid: string]: ContentFetchResult }
-  activeManagerUUID: string
+  activeManagerKey: string
   commandRunning: boolean
 }
 
 export const groupedManagedContents = (
   contents: ManagedContent[],
 ): GroupedManagedContent[] => {
-  const displayPath = (path: string | null) => (path == null ? "Globals" : path)
-
   return contents.reduce(
     (results, current) => {
-      const c = results.find(
-        r => displayPath(r.path) === displayPath(current.path),
-      )
+      const c = results.find(r => r.path === current.path)
       if (c) {
-        c.contents.push({
-          uuid: current.uuid,
-          manager: current.manager,
-        })
+        c.pkgManagers.push(current.manager)
       } else {
         const content: GroupedManagedContent = {
-          path: displayPath(current.path),
-          contents: [
-            {
-              uuid: current.uuid,
-              manager: current.manager,
-            },
-          ],
+          path: current.path,
+          pkgManagers: [current.manager],
         }
         results.push(content)
       }

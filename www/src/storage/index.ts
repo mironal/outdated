@@ -18,6 +18,6 @@ async function read<T>(key: StorageKey, defaultValue: T): Promise<T> {
 
 export const fetchContent = async (): Promise<ManagedContent[]> =>
   read("contents", [
-    createContent("homebrew", null),
-    createContent("npm", null),
+    createContent("homebrew", "Globals"),
+    createContent("npm", "Globals"),
   ])

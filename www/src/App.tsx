@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import "./App.css"
 import Sidebar from "./containers/Sidebar"
 import Content from "./containers/Content"
-import { AppState, groupedManagedContents, LogEntry } from "./types"
+import { AppState, LogEntry, ManagedContent, managerKey } from "./types"
 import { runCommand } from "./exporsedFunc"
 import { buildRunner, run, merge } from "./commands"
 import { fetchContent } from "./storage"
@@ -11,7 +11,7 @@ const defaultAppStore = (): AppState => ({
   logs: [],
   fetchResult: {},
   contents: [],
-  activeManagerUUID: "1",
+  activeManagerKey: "",
   commandRunning: false,
 })
 
@@ -23,7 +23,7 @@ class App extends Component<{}, AppState> {
       .then(contents => {
         this.setState({ contents })
         setImmediate(() => {
-          this.fetch(contents[0].uuid)
+          this.fetch(contents[0])
         })
       })
       .catch(error => console.error(error))
@@ -36,9 +36,11 @@ class App extends Component<{}, AppState> {
       ],
     })
 
-  private fetch = (uuid: string) => {
-    this.setState({ activeManagerUUID: uuid })
-    const content = this.state.contents.find(c => c.uuid === uuid)
+  private fetch = (mc: ManagedContent) => {
+    this.setState({ activeManagerKey: managerKey(mc) })
+    const content = this.state.contents.find(
+      c => c.path === mc.path && c.manager === mc.manager,
+    )
     if (!content) {
       return
     }
@@ -61,7 +63,7 @@ class App extends Component<{}, AppState> {
         this.setState({
           fetchResult: {
             ...current,
-            [uuid]: { results: merged },
+            [managerKey(mc)]: { results: merged },
           },
         })
       })
@@ -70,8 +72,8 @@ class App extends Component<{}, AppState> {
       })
   }
 
-  private onClickContent = (uuid: string) => {
-    this.fetch(uuid)
+  private onClickContent = (mc: ManagedContent) => {
+    this.fetch(mc)
   }
 
   private onClickAdd = async (directory: string) => {
@@ -89,15 +91,15 @@ class App extends Component<{}, AppState> {
   }
 
   public render() {
-    const { activeManagerUUID, logs } = this.state
-    const results = this.state.fetchResult[activeManagerUUID] || {}
-    const loading = !this.state.fetchResult[activeManagerUUID]
+    const { activeManagerKey, logs } = this.state
+    const results = this.state.fetchResult[activeManagerKey] || {}
+    const loading = !this.state.fetchResult[activeManagerKey]
     console.log(logs)
     return (
       <div className="App">
         <Sidebar
-          current={activeManagerUUID}
-          contents={groupedManagedContents(this.state.contents)}
+          activeKey={activeManagerKey}
+          contents={this.state.contents}
           onClickContent={this.onClickContent}
           onClickAdd={this.onClickAdd}
         />

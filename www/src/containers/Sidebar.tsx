@@ -1,34 +1,45 @@
 import React, { PureComponent } from "react"
-import { GroupedManagedContent } from "../types"
+import {
+  GroupedManagedContent,
+  ManagedContent,
+  managerKey,
+  groupedManagedContents,
+} from "../types"
 import classNames from "classnames"
 
 export interface SidebarItemProps {
-  current: string
+  activeKey: string
   content: GroupedManagedContent
-  onClickContent?: (uuid: string) => void
+  onClickContent?: (mc: ManagedContent) => void
 }
 
 const SidebarItem = ({
-  content: { path, contents },
+  content: { path, pkgManagers },
   onClickContent,
-  current,
+  activeKey,
 }: SidebarItemProps) => {
   return (
     <div className="SidebarItem">
-      <h3>{path || "Globals"}</h3>
+      <h3>{path}</h3>
       <ul>
-        {contents.map(c => {
+        {pkgManagers.map(manager => {
+          const key = managerKey({
+            path,
+            manager,
+          })
           return (
             <li
               className={classNames([
-                { active: current === c.uuid },
+                { active: activeKey === key },
                 "clickable",
                 "pkg-manager",
               ])}
-              key={c.uuid}
-              onClick={() => onClickContent && onClickContent(c.uuid)}
+              key={key}
+              onClick={() =>
+                onClickContent && onClickContent({ path, manager })
+              }
             >
-              {c.manager}
+              {manager}
             </li>
           )
         })}
@@ -64,25 +75,25 @@ class ContentInput extends PureComponent<ContentInputProps, ContentInputState> {
 }
 
 export type SidebarProps = {
-  current: string
-  contents: GroupedManagedContent[]
-  onClickContent?: (uuid: string) => void
+  activeKey: string
+  contents: ManagedContent[]
+  onClickContent?: (mc: ManagedContent) => void
 } & ContentInputProps
 
 const Sidebar = ({
+  activeKey,
   contents,
   onClickContent,
   onClickAdd,
-  current,
 }: SidebarProps) => {
   return (
     <div className="Sidebar">
-      {contents.map((c, i) => (
+      {groupedManagedContents(contents).map((c, i) => (
         <SidebarItem
           key={i}
           content={c}
           onClickContent={onClickContent}
-          current={current}
+          activeKey={activeKey}
         />
       ))}
       <ContentInput onClickAdd={onClickAdd} />
