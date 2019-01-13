@@ -1,4 +1,4 @@
-import { ManagedContent, createContent } from "../types"
+import { AppState, resolveGlobals } from "../types"
 
 type StorageKey = "contents"
 
@@ -8,7 +8,7 @@ export const write = async (key: StorageKey, obj: unknown) => {
   return Promise.resolve()
 }
 
-async function read<T>(key: StorageKey, defaultValue: T): Promise<T> {
+export async function read<T>(key: StorageKey, defaultValue: T): Promise<T> {
   const str = localStorage.getItem(key)
   if (str) {
     return JSON.parse(str) as T
@@ -16,8 +16,12 @@ async function read<T>(key: StorageKey, defaultValue: T): Promise<T> {
   return defaultValue
 }
 
-export const fetchContent = async (): Promise<ManagedContent[]> =>
-  read("contents", [
-    createContent("homebrew", "Globals"),
-    createContent("npm", "Globals"),
-  ])
+export async function initializeContents() {
+  let contents: AppState["contents"] = await read("contents", [])
+
+  if (contents.length === 0) {
+    contents = await resolveGlobals()
+  }
+
+  return contents
+}

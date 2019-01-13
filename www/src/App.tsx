@@ -2,10 +2,16 @@ import React, { Component } from "react"
 import "./App.css"
 import Sidebar from "./containers/Sidebar"
 import Content from "./containers/Content"
-import { AppState, LogEntry, ManagedContent, managerKey } from "./types"
+import {
+  AppState,
+  LogEntry,
+  ManagedContent,
+  managerKey,
+  resolveManagers,
+} from "./types"
 import { runCommand } from "./exporsedFunc"
 import { buildRunner, run, merge } from "./commands"
-import { fetchContent } from "./storage"
+import { initializeContents, write } from "./storage"
 
 const defaultAppStore = (): AppState => ({
   logs: [],
@@ -19,7 +25,7 @@ class App extends Component<{}, AppState> {
   public state = defaultAppStore()
 
   public componentDidMount() {
-    fetchContent()
+    initializeContents()
       .then(contents => {
         this.setState({ contents })
         setImmediate(() => {
@@ -46,12 +52,12 @@ class App extends Component<{}, AppState> {
     }
     const runner = buildRunner(content, "list")
 
-    this.addLog(`run > ${runner.command}`)
+    this.addLog(`run > ${runner.command} in ${content.path}`)
     run(runner)
       .then(results => {
         const outdated = buildRunner(content, "outdated")
 
-        this.addLog(`run > ${outdated.command}`)
+        this.addLog(`run > ${outdated.command} in ${content.path}`)
         return Promise.all([results, run(outdated)])
       })
       .then(results => {
@@ -84,8 +90,20 @@ class App extends Component<{}, AppState> {
     runCommand(`test -d ${directory}`)
       .then(() => {
         console.log(directory, "exists")
+        return resolveManagers(directory)
+      })
+      .then(pms => {
+        if (pms.length > 0) {
+          const contents = [...this.state.contents, ...pms]
+          this.setState({
+            contents,
+          })
+          this.fetch(pms[0])
+          return write("contents", contents)
+        }
       })
       .catch(error => {
+        this.addLog(error.message, "error")
         console.error(error)
       })
   }
@@ -94,7 +112,7 @@ class App extends Component<{}, AppState> {
     const { activeManagerKey, logs } = this.state
     const results = this.state.fetchResult[activeManagerKey] || {}
     const loading = !this.state.fetchResult[activeManagerKey]
-    console.log(logs)
+
     return (
       <div className="App">
         <Sidebar

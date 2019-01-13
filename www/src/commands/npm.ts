@@ -6,6 +6,7 @@ export const listCommand = (global: boolean) => {
 
   builder.push("list")
   builder.push("--json")
+  builder.push("--depth=0")
   builder.push("|| true") // avoid exit code 1
 
   return builder.join(" ")

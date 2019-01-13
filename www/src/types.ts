@@ -1,6 +1,6 @@
-export type PackageManager = "npm" | "homebrew"
+import { testNpmPackageJson } from "./commands/tests"
 
-export type Cwd = "Globals" | string
+export type PackageManager = "npm" | "homebrew"
 
 export interface ManagedContent {
   path: string // Globals is special string
@@ -9,7 +9,7 @@ export interface ManagedContent {
 
 export const createContent = (
   manager: PackageManager,
-  path: string,
+  path: string = "Globals",
 ): ManagedContent => {
   return {
     path,
@@ -24,6 +24,20 @@ export const resolveGlobals = () => {
     createContent("homebrew", "Globals"),
     createContent("npm", "Globals"),
   ])
+}
+
+export const resolveManagers = async (path: string) => {
+  const results = await Promise.all([testNpmPackageJson(path)])
+
+  const pms = [] as ManagedContent[]
+
+  if (results[0]) {
+    pms.push({
+      path,
+      manager: "npm",
+    })
+  }
+  return pms
 }
 
 export interface OutdatedResult {

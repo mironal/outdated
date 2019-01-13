@@ -5,12 +5,24 @@ const os = require("os")
 const path = require("path")
 
 const execp = promisify(exec)
+const home = os.homedir()
+
+const resolveHomedir = input => {
+	if (typeof input !== 'string') {
+		throw new TypeError(`Expected a string, got ${typeof input}`);
+	}
+
+	return home ? input.replace(/^~(?=$|\/|\\)/, home) : input;
+}
 
 /**
  * @param {string} command 
  * @param {import "child_process".ExecOptions} opt 
  */
 const runCommand = async (command, opt) => {
+  if (opt && opt.cwd) {
+    opt.cwd = resolveHomedir(opt.cwd)
+  }
   console.log(new Date().toString(), "run command:", `'${command}'`, "with", opt)
   return await execp(command, opt)
 }
