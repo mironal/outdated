@@ -52,12 +52,12 @@ class App extends Component<{}, AppState> {
     }
     const runner = buildRunner(content, "list")
 
-    this.addLog(`run > ${runner.command} in ${content.path}`)
+    this.addLog(`run > '${runner.command}' in '${content.path}'`)
     run(runner)
       .then(results => {
         const outdated = buildRunner(content, "outdated")
 
-        this.addLog(`run > ${outdated.command} in ${content.path}`)
+        this.addLog(`run > '${outdated.command}' in '${content.path}'`)
         return Promise.all([results, run(outdated)])
       })
       .then(results => {
@@ -108,6 +108,13 @@ class App extends Component<{}, AppState> {
       })
   }
 
+  private onClickDelete = async (path: string) => {
+    const contents = this.state.contents.filter(c => c.path !== path)
+    this.setState({ contents })
+
+    await write("contents", contents)
+  }
+
   public render() {
     const { activeManagerKey, logs } = this.state
     const results = this.state.fetchResult[activeManagerKey] || {}
@@ -120,6 +127,7 @@ class App extends Component<{}, AppState> {
           contents={this.state.contents}
           onClickContent={this.onClickContent}
           onClickAdd={this.onClickAdd}
+          onClickDelete={this.onClickDelete}
         />
         <Content loading={loading} results={results.results} logs={logs} />
       </div>

@@ -19,6 +19,21 @@
   text-align: left;
 }
 
+.SidebarTitle button {
+  cursor: pointer;
+  color: rgb(206, 94, 94);
+  background: none;
+  padding: 0 2px;
+  margin: 0;
+  vertical-align: text-top;
+  font-size: 0.8em;
+}
+
+.SidebarTitle button:hover {
+  color: white;
+  background: red;
+}
+
 .pkg-manager.active {
   color: white;
 }

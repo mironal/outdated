@@ -27,15 +27,27 @@ code {
     monospace;
 }
 
-input {
+input,
+button {
   background: rgb(95, 95, 95);
   border: 0px inset white;
   color: rgb(212, 212, 212);
-  padding: 8px;
   font-size: 1em;
+}
+
+input {
+  padding: 8px;
   margin: 0 0 20px;
 }
 
 input:focus {
   outline: none;
+}
+
+button {
+  padding: 8px 4px;
+  margin: 0 1px;
+}
+button:hover {
+  background: rgb(134, 134, 134);
 }
