@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react"
+import React, { useState } from "react"
 import {
   GroupedManagedContent,
   ManagedContent,
@@ -47,31 +47,21 @@ const SidebarItem = ({
     </div>
   )
 }
-
-interface ContentInputState {
-  directory: string
-}
-
 interface ContentInputProps {
   onClickAdd: (directory: string) => void
 }
 
-class ContentInput extends PureComponent<ContentInputProps, ContentInputState> {
-  public state = { directory: "" }
-  public onChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ directory: event.target.value })
-  public onClickAdd = () => this.props.onClickAdd(this.state.directory)
-  public render() {
-    const { directory } = this.state
-    return (
-      <div>
-        <input onChange={this.onChange} type="text" value={directory} />
-        <button onClick={this.onClickAdd} disabled={directory.length === 0}>
-          add
-        </button>
-      </div>
-    )
-  }
+function ContentInput({ onClickAdd }: ContentInputProps) {
+  const [path, setPath] = useState("")
+
+  return (
+    <div>
+      <input onChange={e => setPath(e.target.value)} type="text" value={path} />
+      <button onClick={() => onClickAdd(path)} disabled={path.length === 0}>
+        add
+      </button>
+    </div>
+  )
 }
 
 export type SidebarProps = {
