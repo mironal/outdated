@@ -4,13 +4,13 @@
 
 Powered by [Carlo](https://github.com/GoogleChromeLabs/carlo).
 
-![](./ss.png)
+![](./ss.gif)
 
 ## Supported package manager
 
 - [ ] Carthage
 - [ ] CocoaPods
 - [ ] Swift Package Manager
-- [ ] npm
+- [x] npm
 - [ ] Bundler
-- [ ] homebrew
+- [x] homebrew
