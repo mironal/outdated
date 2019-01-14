@@ -19,8 +19,8 @@ const SidebarItem = ({
   activeKey,
 }: SidebarItemProps) => {
   return (
-    <div className="SidebarItem">
-      <h3>{path}</h3>
+    <div>
+      <h3 className="SidebarTitle">{path}</h3>
       <ul>
         {pkgManagers.map(manager => {
           const key = managerKey({
