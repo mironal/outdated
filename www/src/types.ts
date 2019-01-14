@@ -67,7 +67,7 @@ export interface AppState {
   logs: LogEntry[]
   contents: ManagedContent[]
   fetchResult: { [uuid: string]: ContentFetchResult }
-  activeManagerKey: string
+  active: ManagedContent
   commandRunning: boolean
 }
 

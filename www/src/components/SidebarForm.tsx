@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 
 export interface SidebarFormProps {
-  onClickAdd: (directory: string) => void
+  onClickAdd: (directory: string) => Promise<string>
 }
 
 export default function SidebarForm({ onClickAdd }: SidebarFormProps) {
@@ -12,7 +12,7 @@ export default function SidebarForm({ onClickAdd }: SidebarFormProps) {
       <input onChange={e => setPath(e.target.value)} type="text" value={path} />
       <button
         type="button"
-        onClick={() => onClickAdd(path)}
+        onClick={async () => setPath(await onClickAdd(path))}
         disabled={path.length === 0}
       >
         add

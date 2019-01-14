@@ -17,7 +17,7 @@ const defaultAppStore = (): AppState => ({
   logs: [],
   fetchResult: {},
   contents: [],
-  activeManagerKey: "",
+  active: {} as ManagedContent,
   commandRunning: false,
 })
 
@@ -28,12 +28,17 @@ class App extends Component<{}, AppState> {
     initializeContents()
       .then(contents => {
         this.setState({ contents })
-        setImmediate(() => {
-          this.fetch(contents[0])
-        })
+        this.onClickContent(contents[0])
       })
       .catch(error => console.error(error))
   }
+
+  public componentDidUpdate(_: {}, prevState: AppState) {
+    if (managerKey(this.state.active) !== managerKey(prevState.active)) {
+      this.fetch()
+    }
+  }
+
   private addLog = (msg: string, level: LogEntry["level"] = "log") =>
     this.setState({
       logs: [
@@ -42,14 +47,15 @@ class App extends Component<{}, AppState> {
       ],
     })
 
-  private fetch = (mc: ManagedContent) => {
-    this.setState({ activeManagerKey: managerKey(mc) })
+  private fetch = () => {
+    const mc = this.state.active
     const content = this.state.contents.find(
       c => c.path === mc.path && c.manager === mc.manager,
     )
     if (!content) {
       return
     }
+
     const runner = buildRunner(content, "list")
 
     this.addLog(`run > '${runner.command}' in '${content.path}'`)
@@ -79,15 +85,15 @@ class App extends Component<{}, AppState> {
   }
 
   private onClickContent = (mc: ManagedContent) => {
-    this.fetch(mc)
+    this.setState({ active: mc })
   }
 
   private onClickAdd = async (directory: string) => {
     if (directory.length === 0) {
-      return
+      return ""
     }
 
-    runCommand(`test -d ${directory}`)
+    return runCommand(`test -d ${directory}`)
       .then(() => {
         console.log(directory, "exists")
         return resolveManagers(directory)
@@ -95,16 +101,18 @@ class App extends Component<{}, AppState> {
       .then(pms => {
         if (pms.length > 0) {
           const contents = [...this.state.contents, ...pms]
-          this.setState({
-            contents,
-          })
-          this.fetch(pms[0])
+          this.setState({ contents })
+          this.onClickContent(pms[0])
           return write("contents", contents)
         }
+      })
+      .then(() => {
+        return ""
       })
       .catch(error => {
         this.addLog(error.message, "error")
         console.error(error)
+        return directory
       })
   }
 
@@ -116,7 +124,8 @@ class App extends Component<{}, AppState> {
   }
 
   public render() {
-    const { activeManagerKey, logs } = this.state
+    const { active, logs } = this.state
+    const activeManagerKey = managerKey(active)
     const results = this.state.fetchResult[activeManagerKey] || {}
     const loading = !this.state.fetchResult[activeManagerKey]
 
